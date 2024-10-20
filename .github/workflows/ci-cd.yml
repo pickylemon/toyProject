@@ -20,13 +20,22 @@ jobs:
         run: |
           ls ${{ github.workspace }}
       - run: echo "🍏 This job's status is ${{ job.status }}."
+
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: Build
-        run: |
-          ./gradlew build
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+      - name: Build with Gradle
+        run: ./gradlew clean build -x test
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: jar-file
+          path: build/libs/*.jar
 
   test:
     needs: build
@@ -39,11 +48,30 @@ jobs:
           ./gradlew test
 
   deploy:
-    needs: [build, test]
+    needs: [build]
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v3
-      - name: Deploy
-        run: | 
-          java -jar build/libs/toyProject.jar
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: jar-file
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+      - name: Deploy to EC2
+        env:
+          PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
+          HOST_NAME: ${{ secrets.EC2_HOST }}
+          USER_NAME: ${{ secrets.EC2_USERNAME }}
+        run: |
+          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
+          scp -o StrictHostKeyChecking=no -i private_key ./*.jar ${USER_NAME}@${HOST_NAME}:~/app.jar
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOST_NAME} '
+            pid=$(pgrep -f app.jar) [ -n "$pid" ] && kill $pid
+            nohup java -jar ~/app.jar > ~/app.log 2>&1 &
+          '
+
+
