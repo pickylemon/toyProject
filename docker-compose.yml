@@ -5,9 +5,20 @@ services:
     image: postgres:16
     container_name: postgres-db
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - TZ=Asia/Seoul
     volumes:
       - ./pgdata:/var/lib/postgresql/data
+
+  pgadmin:
+      image: dpage/pgadmin4
+      container_name: pgadmin
+      ports:
+        - "80:80"
+      environment:
+        - PGADMIN_DEFAULT_EMAIL=${DB_ADMIN_EMAIL}
+        - PGADMIN_DEFAULT_PASSWORD=${DB_PASSWORD}g
+      depends_on:
+        - db
