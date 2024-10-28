@@ -19,6 +19,6 @@ services:
         - "80:80"
       environment:
         - PGADMIN_DEFAULT_EMAIL=${DB_ADMIN_EMAIL}
-        - PGADMIN_DEFAULT_PASSWORD=${DB_PASSWORD}g
+        - PGADMIN_DEFAULT_PASSWORD=${DB_PASSWORD}
       depends_on:
         - db
