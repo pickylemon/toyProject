@@ -1,6 +1,6 @@
-package com.woowangjwawang.toyProject.member.repository;
+package com.woowangjwawang.toyProject.login.repository;
 
-import com.woowangjwawang.toyProject.member.domain.Member;
+import com.woowangjwawang.toyProject.login.domain.Member;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;

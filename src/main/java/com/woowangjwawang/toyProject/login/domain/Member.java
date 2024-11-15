@@ -1,4 +1,4 @@
-package com.woowangjwawang.toyProject.member.domain;
+package com.woowangjwawang.toyProject.login.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;
